@@ -24,6 +24,7 @@ from mmdet.datasets.pipelines import to_tensor
 import json
 import cv2
 
+# 给外参旋转增加noise
 def add_rotation_noise(extrinsics, std=0.01, mean=0.0):
     #n = extrinsics.shape[0]
     noise_angle = torch.normal(mean, std=std, size=(3,))
@@ -59,13 +60,14 @@ def add_rotation_noise(extrinsics, std=0.01, mean=0.0):
     extrinsics[:3, :3] = rotation[:3, :3].numpy()
     return extrinsics
 
-
+# 添加外参平移的noise
 def add_translation_noise(extrinsics, std=0.01, mean=0.0):
     # n = extrinsics.shape[0]
     noise = torch.normal(mean, std=std, size=(3,))
     extrinsics[0:3, -1] += noise.numpy()
     return extrinsics
 
+# bev 投影到 uv
 def perspective(cam_coords, proj_mat):
     pix_coords = proj_mat @ cam_coords
     valid_idx = pix_coords[2, :] > 0
@@ -73,6 +75,7 @@ def perspective(cam_coords, proj_mat):
     pix_coords = pix_coords[:2, :] / (pix_coords[2, :] + 1e-7)
     pix_coords = pix_coords.transpose(1, 0)
     return pix_coords
+
 class LiDARInstanceLines(object):
     """Line instance in LIDAR coordinates
 
